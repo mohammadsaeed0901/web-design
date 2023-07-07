@@ -3,6 +3,8 @@ import { Outlet } from "react-router-dom";
 import Header from "./Header/Header";
 import Menu from "./Menu/Menu.component";
 import MenuContext from "./Menu/MenuContext";
+import { Suspense } from "react";
+import Loading from "Components/Loading/Loading.component";
 
 const StyledContainer = styled(Container)(() => ({
   [`&.${containerClasses.root}`]: {
@@ -22,7 +24,9 @@ const Index = () => {
           <Header />
           <Box component="main" sx={{ flex: 1, marginY: "6rem", position: "relative" }}>
             <StyledContainer>
+              <Suspense fallback={<Loading />}>
                 <Outlet />
+              </Suspense>
             </StyledContainer>
           </Box>
         </Box>
