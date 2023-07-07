@@ -3,9 +3,9 @@ export interface PlaneCardPropsType {
     detail: {
         name: string;
         logo?: string;
-        sys?: string;
-        type?: string;
-        eco?: string;
+        ticketType?: string; 
+        type?: string; 
+        class?: string;
     }
     from: {
         city: string;
@@ -15,5 +15,6 @@ export interface PlaneCardPropsType {
         city: string;
         hour: string;
     };
+    remaining?: number;
     onClick?: () => void;
 }

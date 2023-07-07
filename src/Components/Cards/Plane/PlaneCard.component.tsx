@@ -6,11 +6,11 @@ import type { PlaneCardPropsType } from "./PlaneCard";
 import { ArrowLeftIcon } from "Assets/Svg";
 
 const PlaneCard: FC<PlaneCardPropsType> = (props) => {
-    const { totalPrice, detail, from, to, onClick } = props
+    const { totalPrice, detail, from, to, remaining,  onClick } = props
     const theme = useTheme();
 
     return (
-        <Box sx={{ display: "flex", borderRadius: "8px", border: "2px solid #f7f7f7", width: "60%", direction: "rtl" }}>
+        <Box sx={{ display: "flex", borderRadius: "8px", border: "2px solid #f7f7f7", width: "100%", direction: "rtl" }}>
             <Box sx={{ display: "flex" , flex: 1, padding: "16px 24px", gap: 3 }}>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 1, alignItems: "center" }}>
                     <Box component="img" src={detail?.logo} alt="logo" sx={{ width: "50px", height: "50px", border: "2px solid #f7f7f7", borderRadius: "50%" }} />
@@ -20,8 +20,8 @@ const PlaneCard: FC<PlaneCardPropsType> = (props) => {
                 </Box>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
                     <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-                        {detail?.sys && <Chip label={detail?.sys} size="small" variant="outlined" color="default" />}
-                        {detail?.eco && <Chip label={detail?.eco} size="small" variant="outlined" color="default" />}
+                        {detail?.ticketType && <Chip label={detail?.ticketType} size="small" variant="outlined" color="default" />}
+                        {detail?.class && <Chip label={detail?.class} size="small" variant="outlined" color="default" />}
                         {detail?.type && <Chip label={detail?.type} size="small" variant="outlined" color="default" />}
                     </Box>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -63,6 +63,11 @@ const PlaneCard: FC<PlaneCardPropsType> = (props) => {
                 <Button variant="contained" onClick={onClick}>
                     انتخاب پرواز
                 </Button>
+                {remaining && (
+                <Typography variant="subtitle1" color={theme.palette.error.main}>
+                    {toPersianDigit(remaining)} صندلی باقی مانده
+                </Typography>
+                )}
             </Box>
         </Box>
     );
