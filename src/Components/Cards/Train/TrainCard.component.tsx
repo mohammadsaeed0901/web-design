@@ -1,9 +1,9 @@
 import { Button, Box, Typography, useTheme, Chip } from "@mui/material";
 import { priceSeparator, toPersianDigit } from "Helpers/Utils";
+import { ArrowLeftIcon } from "Assets/Svg";
 
 import type { FC } from "react";
 import type { TrainCardPropsType } from "./TrainCard";
-import { ArrowLeftIcon } from "Assets/Svg";
 
 const TrainCard: FC<TrainCardPropsType> = (props) => {
     const { totalPrice, detail, from, to, remaining ,onClick } = props
@@ -72,7 +72,6 @@ const TrainCard: FC<TrainCardPropsType> = (props) => {
                     {toPersianDigit(remaining)} صندلی باقی مانده
                 </Typography>
                 )}
-                
             </Box>
         </Box>
     );

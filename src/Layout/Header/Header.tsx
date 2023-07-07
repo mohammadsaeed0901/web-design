@@ -73,7 +73,7 @@ const Header = () => {
                                 <Button
                                     sx={classes.profileMenuButton}
                                     fullWidth
-                                    onClick={() => console.log("qwe")}
+                                    onClick={() => window.location.assign("/flights")}
                                 >
                                     هواپیما
                                 </Button>
@@ -81,7 +81,7 @@ const Header = () => {
                                 <Button
                                     sx={classes.profileMenuButton}
                                     fullWidth
-                                    onClick={() => console.log("qwe")}
+                                    onClick={() => window.location.assign("/trains")}
                                 >
                                     قطار
                                 </Button>
