@@ -1,5 +1,5 @@
 import { Box, Button, FormControl, MenuItem, Select, TextField, Typography } from "@mui/material";
-import { UserGroupIcon } from "Assets/Svg";
+import { PlaneIcon, UserGroupIcon } from "Assets/Svg";
 import { useState, type FC } from "react";
 
 const PlaneReserve: FC = (props) => {
@@ -16,9 +16,12 @@ const PlaneReserve: FC = (props) => {
         flexDirection: "column",
         justifyContent: "center",
         direction: "rtl", 
-        border: "1px solid #f7f7f7", 
+        border: "2px solid #f7f7f7", 
         borderRadius: "8px",
         gap: 2,
+        ":not(:last-child)": {
+          marginBottom: "32px",
+        },
       },
       inputBox: {
         display: "flex", 
@@ -32,68 +35,121 @@ const PlaneReserve: FC = (props) => {
     };
 
     return (
-      <Box sx={classes.box}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <UserGroupIcon />
-          <Typography variant="h6">
-            مشخصات مسافر
-          </Typography>
+      <>
+        <Box sx={classes.box}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <PlaneIcon />
+            <Typography variant="h5">
+              مشخصات پرواز
+            </Typography>
+          </Box>
+          <Box sx={{ display: "flex" }}>
+            <Box sx={{ display: "flex", width: "50%", flexDirection: "column" }}>
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <Typography>
+                  مبدا:
+                </Typography>
+                <Typography>
+                  {1+1}
+                </Typography>
+              </Box>
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <Typography>
+                  مقصد:
+                </Typography>
+                <Typography>
+                  {1+1}
+                </Typography>
+              </Box>
+            </Box>
+            <Box sx={{ display: "flex", width: "50%", flexDirection: "column" }}>
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <Typography>
+                  مبدا:
+                </Typography>
+                <Typography>
+                  {1+1}
+                </Typography>
+              </Box>
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <Typography>
+                  مقصد:
+                </Typography>
+                <Typography>
+                  {1+1}
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
         </Box>
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
-          <Box sx={classes.inputBox}>
-            <Typography>
-              نام
+        <Box sx={classes.box}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <UserGroupIcon />
+            <Typography variant="h5">
+              مشخصات مسافر
             </Typography>
-            <TextField type="text" value={name} onChange={e => setName(e.target.value)} sx={classes.input} />
           </Box>
-          <Box sx={classes.inputBox}>
-            <Typography>
-              نام خانوادگی
-            </Typography>
-            <TextField type="text" value={lastName} onChange={e => setLastName(e.target.value)} sx={classes.input} />
-          </Box>
-          <Box sx={classes.inputBox}>
-            <Typography>
-              جنسیت
-            </Typography>
-            <FormControl>
-              <Select
-                labelId="gender"
-                id="gender-id"
-                value={gender} 
-                MenuProps={{
-                  PaperProps: {
-                    sx: {
-                      maxHeight: "300px",
-                      direction: "rtl",
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+            <Box sx={classes.inputBox}>
+              <Typography>
+                نام
+                <span style={{ color: "red" }}>*</span>
+              </Typography>
+              <TextField type="text" value={name} onChange={e => setName(e.target.value)} sx={classes.input} />
+            </Box>
+            <Box sx={classes.inputBox}>
+              <Typography>
+                نام خانوادگی
+                <span style={{ color: "red" }}>*</span>
+              </Typography>
+              <TextField type="text" value={lastName} onChange={e => setLastName(e.target.value)} sx={classes.input} />
+            </Box>
+            <Box sx={classes.inputBox}>
+              <Typography>
+                جنسیت
+                <span style={{ color: "red" }}>*</span>
+              </Typography>
+              <FormControl>
+                <Select
+                  labelId="gender"
+                  id="gender-id"
+                  value={gender} 
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        maxHeight: "300px",
+                        direction: "rtl",
+                      },
                     },
-                  },
-                }}
-                onChange={e => setGender(e.target.value)} 
-                sx={classes.input}
-              >
-                <MenuItem value={"male"}>آقا</MenuItem>
-                <MenuItem value={"female"}>خانم</MenuItem>
-              </Select>
-            </FormControl>
+                  }}
+                  onChange={e => setGender(e.target.value)} 
+                  sx={classes.input}
+                >
+                  <MenuItem value={"male"}>آقا</MenuItem>
+                  <MenuItem value={"female"}>خانم</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+            <Box sx={classes.inputBox}>
+              <Typography>
+                کد ملی
+                <span style={{ color: "red" }}>*</span>
+              </Typography>
+              <TextField type="text" value={nationalCode} onChange={e => setNationalCode(e.target.value)} sx={classes.input} />
+            </Box>
+            <Box sx={classes.inputBox}>
+              <Typography>
+                تاریخ تولد
+                <span style={{ color: "red" }}>*</span>
+              </Typography>
+              <TextField type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)} sx={classes.input} />
+            </Box>
+            <Button variant="contained" color="primary" disabled={!name || !lastName || !nationalCode || !gender || !birthDate} sx={{display: "flex", alignSelf: "end", minWidth: "250px", height: "55px"}} onClick={() => console.log("a")}>
+              تایید رزرو
+            </Button>
           </Box>
-          <Box sx={classes.inputBox}>
-            <Typography>
-              کد ملی
-            </Typography>
-            <TextField type="text" value={nationalCode} onChange={e => setNationalCode(e.target.value)} sx={classes.input} />
-          </Box>
-          <Box sx={classes.inputBox}>
-            <Typography>
-              تاریخ تولد
-            </Typography>
-            <TextField type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)} sx={classes.input} />
-          </Box>
-          <Button variant="contained" color="primary" sx={{display: "flex", alignSelf: "end", minWidth: "250px", height: "55px"}} onClick={() => console.log("a")}>
-            تایید و ادامه خرید
-          </Button>
         </Box>
-      </Box>
+      </>
     );
 };
 
