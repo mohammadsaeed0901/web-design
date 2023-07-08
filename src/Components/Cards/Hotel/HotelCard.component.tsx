@@ -18,7 +18,7 @@ const HotelCard: FC<CardProps> = (props) => {
     const theme = useTheme();
 
     return (
-        <Box sx={{ display: "flex", borderRadius: "8px", border: "2px solid #f7f7f7", width: "70%", direction: "rtl" }}>
+        <Box sx={{ display: "flex", borderRadius: "8px", border: "2px solid #f7f7f7", width: "100%", direction: "rtl" }}>
             <img src={imageSrc} alt="hotel" width="30%" height="200px" style={{ objectFit: "cover", borderRadius: "0 8px 8px 0" }} />
             <Box sx={{ display: "flex" , flex: 1, padding: "8px 16px", flexDirection: "column", gap: 1, justifyContent: "center" }}>
                 <Typography variant="h5">{name}</Typography>

@@ -10,7 +10,7 @@ const TrainCard: FC<TrainCardPropsType> = (props) => {
     const theme = useTheme();
 
     return (
-        <Box sx={{ display: "flex", borderRadius: "8px", border: "2px solid #f7f7f7", width: "60%", direction: "rtl" }}>
+        <Box sx={{ display: "flex", borderRadius: "8px", border: "2px solid #f7f7f7", width: "100%", direction: "rtl" }}>
             <Box sx={{ display: "flex" , flex: 1, padding: "16px 24px", gap: 3 }}>
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                     <Box component="img" src={detail?.logo} alt="logo" sx={{ width: "50px", height: "50px", border: "2px solid #f7f7f7", borderRadius: "50%" }} />
@@ -65,7 +65,7 @@ const TrainCard: FC<TrainCardPropsType> = (props) => {
                     </Typography>
                 </Box>
                 <Button variant="contained" onClick={onClick}>
-                    انتخاب پرواز
+                    انتخاب قطار
                 </Button>
                 {remaining && (
                 <Typography variant="subtitle1" color={theme.palette.error.main}>
