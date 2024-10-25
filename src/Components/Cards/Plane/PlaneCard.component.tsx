@@ -1,51 +1,67 @@
-import { Button, Box, Typography, useTheme, Chip } from "@mui/material";
+import { Button, Box, Typography, useTheme, Chip, Divider } from "@mui/material";
 import { priceSeparator, toPersianDigit } from "Helpers/Utils";
 
 import type { FC } from "react";
-import type { PlaneCardPropsType } from "./PlaneCard";
-import { ArrowLeftIcon } from "Assets/Svg";
+import { AirplaneClassTypeTrans, AirplaneTicketTypeTrans, AirplaneTypeTrans, type PlaneCardPropsType } from "./PlaneCard.d";
+import { FlightTakeoffRounded, HomeRounded } from "@mui/icons-material";
+import { CalculateDepartureAndArrivalTime } from "Helpers/FlightUtils";
 
-const PlaneCard: FC<PlaneCardPropsType> = (props) => {
-    const { totalPrice, detail, from, to, remaining,  onClick } = props
+const PlaneCard: FC<PlaneCardPropsType> = ({ flight, cities, onClick }) => {
+    const { airline, airplaneClassType, airplaneTicketType, airplaneType, departureTime, destinationCityId, journeyDurationPerMinute, logoBase64, originCityId, totalPrice, remainingSeatsNo } = flight;
     const theme = useTheme();
+
+    const { formattedDepartureTime, formattedArrivalTime } = CalculateDepartureAndArrivalTime(departureTime, journeyDurationPerMinute);
 
     return (
         <Box sx={{ display: "flex", borderRadius: "8px", border: "2px solid #f7f7f7", width: "100%", direction: "rtl" }}>
             <Box sx={{ display: "flex" , flex: 1, padding: "16px 24px", gap: 3 }}>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 1, alignItems: "center" }}>
-                    <Box component="img" src={detail?.logo} alt="logo" sx={{ width: "50px", height: "50px", border: "2px solid #f7f7f7", borderRadius: "50%" }} />
+                    <Box component="img" src={logoBase64} alt="logo" sx={{ width: "50px", height: "50px", border: "2px solid #f7f7f7", borderRadius: "50%" }} />
                     <Typography variant="body2">
-                        {detail?.name}
+                        {airline}
                     </Typography>
                 </Box>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 1, flex: 1 }}>
                     <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-                        {detail?.ticketType && <Chip label={detail?.ticketType} size="small" variant="outlined" color="default" />}
-                        {detail?.class && <Chip label={detail?.class} size="small" variant="outlined" color="default" />}
-                        {detail?.type && <Chip label={detail?.type} size="small" variant="outlined" color="default" />}
+                        {airplaneTicketType && <Chip label={AirplaneTicketTypeTrans[airplaneTicketType]} size="small" variant="outlined" color="default" />}
+                        {airplaneClassType && <Chip label={AirplaneClassTypeTrans[airplaneClassType]} size="small" variant="outlined" color="default" />}
+                        {airplaneType && <Chip label={AirplaneTypeTrans[airplaneType]} size="small" variant="outlined" color="default" />}
                     </Box>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                            <Typography variant="body2">
-                                مبدأ:
-                            </Typography>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexDirection: "column" }}>
                             <Typography variant="body1">
-                                {from?.city}
+                                {cities.find(ct => ct.id === originCityId)?.faDisplayName}
                             </Typography>
                             <Typography variant="h6">
-                                {toPersianDigit(from?.hour)}
+                                {toPersianDigit(formattedDepartureTime)}
                             </Typography>
                         </Box>
-                        <ArrowLeftIcon viewBox="0 0 16 16" style={{ fontSize: "1rem" }} />
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                            <Typography variant="body2">
-                                مقصد:
-                            </Typography>
+                        <Box sx={{ display: "flex", width: "50%" }}>
+                            <FlightTakeoffRounded />
+                            <Box sx={{ flexGrow: 1, position: 'relative' }}>
+                                <Divider sx={{ position: 'absolute', width: '100%', top: '50%' }} />
+                                <Typography
+                                    variant="subtitle1"
+                                    sx={{
+                                        position: 'absolute',
+                                        top: '-8px',
+                                        left: '50%',
+                                        transform: 'translateX(-50%)',
+                                        backgroundColor: 'white',
+                                        px: 0.5,
+                                    }}
+                                >
+                                    {Math.floor(journeyDurationPerMinute / 60)}ساعت {journeyDurationPerMinute % 60}دقیقه
+                                </Typography>
+                            </Box>
+                            <HomeRounded />
+                        </Box>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexDirection: "column" }}>
                             <Typography variant="body1">
-                                {to?.city}
+                                {cities.find(ct => ct.id === destinationCityId)?.faDisplayName}
                             </Typography>
                             <Typography variant="h6">
-                                {toPersianDigit(to?.hour)}
+                                {toPersianDigit(formattedArrivalTime)}
                             </Typography>
                         </Box>
                     </Box>
@@ -54,7 +70,7 @@ const PlaneCard: FC<PlaneCardPropsType> = (props) => {
             <Box sx={{ display: "flex", padding: "16px 24px", borderRight: "2px solid #f7f7f7", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 1 }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <Typography variant="h5" color={theme.palette.primary.main}>
-                        {toPersianDigit(priceSeparator(totalPrice))}
+                        {toPersianDigit(priceSeparator(+totalPrice))}
                     </Typography>
                     <Typography variant="subtitle1">
                         ریال
@@ -63,10 +79,10 @@ const PlaneCard: FC<PlaneCardPropsType> = (props) => {
                 <Button variant="contained" onClick={onClick}>
                     انتخاب پرواز
                 </Button>
-                {remaining && (
-                <Typography variant="subtitle1" color={theme.palette.error.main}>
-                    {toPersianDigit(remaining)} صندلی باقی مانده
-                </Typography>
+                {remainingSeatsNo <= 10 && (
+                    <Typography variant="subtitle1" color={theme.palette.error.main}>
+                        {toPersianDigit(remainingSeatsNo)} صندلی باقی مانده
+                    </Typography>
                 )}
             </Box>
         </Box>

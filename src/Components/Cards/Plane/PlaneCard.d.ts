@@ -1,20 +1,23 @@
+import { type ICity } from "Interfaces/City.interface";
+import { type IFlight } from "Interfaces/Flight.interface";
+
 export interface PlaneCardPropsType {
-    totalPrice: number;
-    detail: {
-        name: string;
-        logo?: string;
-        ticketType?: string; 
-        type?: string; 
-        class?: string;
-    }
-    from: {
-        city: string;
-        hour: string;
-    };
-    to: {
-        city: string;
-        hour: string;
-    };
-    remaining?: number;
+    flight: IFlight;
+    cities: ICity[];
     onClick?: () => void;
 }
+
+export const AirplaneTypeTrans: Record<string, string> = {
+    "BOEING": "بویینگ",
+    "AIRBUS": "ایرباس",
+};
+
+export const AirplaneClassTypeTrans: Record<string, string> = {
+    "BUSINESS": "بیزینس",
+    "ECONOMY": "اکونومی",
+};
+
+export const AirplaneTicketTypeTrans: Record<string, string> = {
+    "SYSTEM": "سیستمی",
+    "CHARTER": "چارتری"
+};
