@@ -1,7 +1,14 @@
 import { Box, Button, FormControl, FormHelperText, MenuItem, Select, Tab, Tabs, TextField, Typography } from "@mui/material";
-import { useState, type FC } from "react";
-import { Cities } from "./Dashboard.module";
+import { useState, type FC, useContext, useEffect, useMemo } from "react";
 import { createSearchParams, useNavigate } from "react-router-dom";
+import { TabContext } from "Layout/Header/TabContext.component";
+import axios from "axios";
+import { ICity } from "Interfaces/City.interface";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import { FormProvider, useForm } from "react-hook-form";
+import SelectComponent from "Components/Select/Select.component";
+import InputComponent from "Components/Input/Input.component";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -29,20 +36,54 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
+
 const Dashboard: FC = () => {
-  const [value, setValue] = useState<number>(0);
+  const { value, setValue } = useContext(TabContext);
   const navigate = useNavigate();
-  const [plane, setPlane] = useState<{origin?: string; destination?: string; checkIn?: string; checkOut?: string; passengersNo?: number;}>({passengersNo: 1});
   const [train, setTrain] = useState<{origin?: string; destination?: string; checkIn?: string; checkOut?: string; passengersNo?: number;}>({passengersNo: 1});
   const [hotel, setHotel] = useState<{destination?: string; checkIn?: string; checkOut?: string; passengersNo?: number;}>({passengersNo: 1});
   const [accommodation, setAccommodation] = useState<{destination?: string; checkIn?: string; checkOut?: string; passengersNo?: number;}>({passengersNo: 1});
-
-  const [planeMessage, setPlaneMessage] = useState<{origin?: string | null; destination?: string | null; checkIn?: string | null; passengersNo?: string | null;} | null>(null);
+  const [cities, setCities] = useState<ICity[]>([]);
+  
   const [trainMessage, setTrainMessage] = useState<{origin?: string | null; destination?: string | null; checkIn?: string | null; passengersNo?: string | null;} | null>(null);
   const [hotelMessage, setHotelMessage] = useState<{checkOut?: string | null; destination?: string | null; checkIn?: string | null; passengersNo?: string | null;} | null>(null);
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
+  
+  const flightSchema = useMemo(
+    () =>
+      yupResolver(
+        yup.object({
+          origin: yup.string(),
+          destination: yup.string(),
+          departureDate: yup.string(),
+          adtNo: yup.number(),
+        })
+      ),
+    []
+  );
+
+  const formMethods = useForm({
+    mode: "onChange",
+    resolver: flightSchema,
+    defaultValues: { adtNo: 1 },
+  });
+
+  const { control, formState, handleSubmit, getValues } = formMethods;
+
+  const fetchCities = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/cities');
+      setCities(response.data);
+    } catch (error) {
+      console.error('Error fetching cities:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCities();
+  }, []);
 
   const classes = {
     box: {
@@ -82,131 +123,65 @@ const Dashboard: FC = () => {
             <Tab label="سوئیت" />
           </Tabs>
           <TabPanel value={value} index={0}>
-            <Box sx={{ display: "flex",direction: "rtl", justifyContent: "space-between" }}>
-              <Box sx={{ display: "flex", flexDirection: "column" }}>
-                <Typography>
-                  مبدا (شهر)
-                  <span style={{ color: "red" }}>*</span>
-                </Typography>
-                <FormControl>
-                  <Select
-                    labelId="origin-city"
-                    id="origin-city-id"
-                    value={plane?.origin}
-                    sx={classes.input}
-                    MenuProps={{
-                      PaperProps: {
-                        sx: {
-                          maxHeight: "300px",
-                          direction: "rtl",
-                        },
-                      },
-                    }}
-                    onChange={e => {
-                      if (!e.target.value) {
-                        setPlaneMessage(prevState => ({...prevState, origin: "مبدا را وارد کنید"}));
-                      } else {
-                        setPlane(prevState => ({ ...prevState, origin: e.target.value}));
-                      }
-                    }}
-                  >
-                    {Cities.map((city) => (
-                      <MenuItem value={city.value}>{city.label}</MenuItem>
-                    ))}
-                  </Select>
-                  {!planeMessage?.origin && (
-                    <FormHelperText>{planeMessage?.origin}</FormHelperText>
-                  )}
-                </FormControl>
+            <FormProvider {...formMethods}>
+              <Box sx={{ display: "flex",direction: "rtl", justifyContent: "space-between" }}>
+                <Box sx={{ display: "flex", flexDirection: "column" }}>
+                  <Typography>
+                    مبدا (شهر)
+                    <span style={{ color: "red" }}>*</span>
+                  </Typography>
+                  <SelectComponent
+                    control={control}
+                    name="origin"
+                    options={cities.map((ct) => ({
+                      label: ct.faDisplayName,
+                      value: ct.id
+                    }))}
+                  />
+                </Box>
+                <Box sx={{ display: "flex", flexDirection: "column" }}>
+                  <Typography>
+                    مقصد (شهر)
+                    <span style={{ color: "red" }}>*</span>
+                  </Typography>
+                  <SelectComponent
+                    control={control}
+                    name="destination"
+                    options={cities.map((ct) => ({
+                      label: ct.faDisplayName,
+                      value: ct.id
+                    }))}
+                  />
+                </Box>
+                <Box sx={{ display: "flex", flexDirection: "column" }}>
+                  <Typography>
+                    تاریخ رفت
+                    <span style={{ color: "red" }}>*</span>
+                  </Typography>
+                  <InputComponent control={control} name="departureDate" type="date" />
+                </Box>
+                <Box sx={{ display: "flex", flexDirection: "column" }}>
+                  <Typography>
+                    تعداد مسافران
+                    <span style={{ color: "red" }}>*</span>
+                  </Typography>
+                  <InputComponent control={control} name="adtNo" type="number" />
+                </Box>
+                <Button variant="contained" color="warning" disabled={!formState.isValid} sx={classes.button} onClick={() => {
+                  navigate({
+                    pathname: `/flights`,
+                    search: createSearchParams({
+                      departure: getValues("origin") ?? "",
+                      arrival: getValues("destination") ?? "",
+                      departureDate: getValues("departureDate") ?? "",
+                      adt: getValues("adtNo")?.toString() ?? "",
+                    }).toString()
+                  });
+                }}>
+                  جستجو
+                </Button>
               </Box>
-              <Box sx={{ display: "flex", flexDirection: "column" }}>
-                <Typography>
-                  مقصد (شهر)
-                  <span style={{ color: "red" }}>*</span>
-                </Typography>
-                <FormControl>
-                  <Select
-                    labelId="origin-city"
-                    id="origin-city-id"
-                    value={plane?.destination} 
-                    sx={classes.input}
-                    MenuProps={{
-                      PaperProps: {
-                        sx: {
-                          maxHeight: "300px",
-                          direction: "rtl",
-                        },
-                      },
-                    }}
-                    onChange={e => {
-                      if (!e.target.value) {
-                        setPlaneMessage(prevState => ({...prevState, destination: "مقصد را وارد کنید"}));
-                      } else {
-                        setPlane(prevState => ({ ...prevState, destination: e.target.value}))
-                      }
-                    }}
-                  >
-                    {Cities.map((city) => (
-                      <MenuItem value={city.value}>{city.label}</MenuItem>
-                    ))}
-                  </Select>
-                  {!planeMessage?.destination && (
-                    <FormHelperText>{planeMessage?.destination}</FormHelperText>
-                  )}
-                </FormControl>
-              </Box>
-              <Box sx={{ display: "flex", flexDirection: "column" }}>
-                <Typography>
-                  تاریخ رفت
-                  <span style={{ color: "red" }}>*</span>
-                </Typography>
-                <TextField type="date" value={plane?.checkIn} sx={classes.input}
-                onChange={e => {
-                  if (!e.target.value) {
-                    setPlaneMessage(prevState => ({...prevState, destination: "تاریخ رفت را وارد کنید"}));
-                  } else {
-                    setPlane(prevState => ({ ...prevState, checkIn: e.target.value}));
-                  }
-                }}/>
-                {!planeMessage?.checkIn && (
-                  <FormHelperText>{planeMessage?.checkIn}</FormHelperText>
-                )}
-              </Box>
-              <Box sx={{ display: "flex", flexDirection: "column" }}>
-                <Typography>
-                  تاریخ برگشت
-                </Typography>
-                <TextField type="date" value={plane?.checkOut} onChange={e => setPlane(prevState => ({ ...prevState, checkOut: e.target.value}))} sx={classes.input} />
-              </Box>
-              <Box sx={{ display: "flex", flexDirection: "column" }}>
-                <Typography>
-                  تعداد مسافران
-                  <span style={{ color: "red" }}>*</span>
-                </Typography>
-                <TextField type="number" value={plane?.passengersNo} defaultValue={1} sx={classes.input}
-                onChange={e => {
-                  if (!e.target.value || +e.target.value < 0) {
-                    setPlaneMessage(prevState => ({...prevState, destination: "تعداد مسافران را وارد کنید"}));
-                  } else {
-                    setPlane(prevState => ({ ...prevState, passengersNo: +e.target.value}));
-                  }
-                }}/>
-                {!planeMessage?.passengersNo && (
-                  <FormHelperText>{planeMessage?.passengersNo}</FormHelperText>
-                )}
-              </Box>
-              <Button variant="contained" color="warning" disabled={!plane?.origin || !plane?.destination || !plane?.checkIn || !plane?.passengersNo} sx={classes.button} onClick={() => {
-                navigate({
-                  pathname: `/flights/${plane?.origin}-${plane?.destination}`,
-                  search: createSearchParams({
-                    departing: plane?.checkIn ?? "",
-                    passNo: plane?.passengersNo?.toString() ?? "",
-                  }).toString()
-                });
-              }}>
-                جستجو
-              </Button>
-            </Box>
+            </FormProvider>
           </TabPanel>
           <TabPanel value={value} index={1}>
             <Box sx={{ display: "flex",direction: "rtl", justifyContent: "space-between" }}>
@@ -237,11 +212,14 @@ const Dashboard: FC = () => {
                       }
                     }}
                   >
-                    {Cities.map((city) => (
-                      <MenuItem value={city.value}>{city.label}</MenuItem>
+                    {cities.map((city) => (
+                      <MenuItem value={city.name}>{city.faDisplayName}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
+                {!trainMessage?.origin && (
+                  <FormHelperText>{trainMessage?.origin}</FormHelperText>
+                )}
               </Box>
               <Box sx={{ display: "flex", flexDirection: "column" }}>
                 <Typography>
@@ -270,11 +248,14 @@ const Dashboard: FC = () => {
                       }
                     }}
                   >
-                    {Cities.map((city) => (
-                      <MenuItem value={city.value}>{city.label}</MenuItem>
+                    {cities.map((city) => (
+                      <MenuItem value={city.name}>{city.faDisplayName}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
+                {!trainMessage?.destination && (
+                  <FormHelperText>{trainMessage?.destination}</FormHelperText>
+                )}
               </Box>
               <Box sx={{ display: "flex", flexDirection: "column" }}>
                 <Typography>
@@ -290,6 +271,9 @@ const Dashboard: FC = () => {
                       }
                     }} 
                   sx={classes.input} />
+                  {!trainMessage?.checkIn && (
+                  <FormHelperText>{trainMessage?.checkIn}</FormHelperText>
+                )}
               </Box>
               <Box sx={{ display: "flex", flexDirection: "column" }}>
                 <Typography>
@@ -311,6 +295,9 @@ const Dashboard: FC = () => {
                       }
                     }} 
                   sx={classes.input} />
+                  {!trainMessage?.passengersNo && (
+                  <FormHelperText>{trainMessage?.passengersNo}</FormHelperText>
+                )}
               </Box>
               <Button variant="contained" color="warning" disabled={!train?.origin || !train?.destination || !train?.checkIn || !train?.passengersNo} sx={classes.button} 
                 onClick={() => {
@@ -355,11 +342,14 @@ const Dashboard: FC = () => {
                       }
                     }}
                   >
-                    {Cities.map((city) => (
-                      <MenuItem value={city.value}>{city.label}</MenuItem>
+                    {cities.map((city) => (
+                      <MenuItem value={city.name}>{city.faDisplayName}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
+                {!hotelMessage?.destination && (
+                  <FormHelperText>{hotelMessage?.destination}</FormHelperText>
+                )}
               </Box>
               <Box sx={{ display: "flex", flexDirection: "column" }}>
                 <Typography>
@@ -375,6 +365,9 @@ const Dashboard: FC = () => {
                     }
                   }}
                   sx={classes.input} />
+                {!hotelMessage?.checkIn && (
+                  <FormHelperText>{hotelMessage?.checkIn}</FormHelperText>
+                )}
               </Box>
               <Box sx={{ display: "flex", flexDirection: "column" }}>
                 <Typography>
@@ -390,6 +383,9 @@ const Dashboard: FC = () => {
                     }
                   }} 
                   sx={classes.input} />
+                {!hotelMessage?.checkOut && (
+                  <FormHelperText>{hotelMessage?.checkOut}</FormHelperText>
+                )}
               </Box>
               <Box sx={{ display: "flex", flexDirection: "column" }}>
                 <Typography>
@@ -405,6 +401,9 @@ const Dashboard: FC = () => {
                     }
                   }} 
                   sx={classes.input} />
+                {!hotelMessage?.passengersNo && (
+                  <FormHelperText>{hotelMessage?.passengersNo}</FormHelperText>
+                )}
               </Box>
               <Button variant="contained" color="warning" disabled={!hotel?.checkOut || !hotel?.destination || !hotel?.checkIn || !hotel?.passengersNo} sx={classes.button} 
                 onClick={() => {
@@ -444,8 +443,8 @@ const Dashboard: FC = () => {
                     }}
                     onChange={e => setAccommodation(prevState => ({ ...prevState, destination: e.target.value}))}
                   >
-                    {Cities.map((city) => (
-                      <MenuItem value={city.value}>{city.label}</MenuItem>
+                    {cities.map((city) => (
+                      <MenuItem value={city.name}>{city.faDisplayName}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
