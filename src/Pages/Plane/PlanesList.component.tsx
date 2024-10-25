@@ -1,280 +1,144 @@
-import { Box, Button, Divider, FormControl, MenuItem, Select, TextField, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import PlaneCard from "Components/Cards/Plane/PlaneCard.component";
-import { IPlaneDetail } from "Interfaces/PlaneDetail.interface";
-import { Cities } from "../Dashboard/Dashboard.module";
-import { useState, type FC } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useState, type FC, useEffect, useMemo } from "react";
+import { createSearchParams, useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
+import axios from "axios";
+import { ICity } from "Interfaces/City.interface";
+import { FormProvider, useForm } from "react-hook-form";
+import InputComponent from "Components/Input/Input.component";
+import SelectComponent from "Components/Select/Select.component";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import { type IFlight } from "Interfaces/Flight.interface";
 
 const PlanesList: FC = () => {
-  const { city } = useParams();
   const [searchParams] = useSearchParams();
+  const [planes, setPlanes] = useState<IFlight[]>([]);
+  const [cities, setCities] = useState<ICity[]>([]); 
   const navigate = useNavigate();
+
+  const fetchFlights = async (departure?: string | null, arrival?: string | null, departureDate?: string | null, adt?: string | null) => {
+    try {
+        const response = await axios.get('http://localhost:5000/api/flights', {
+            params: {
+              departure,
+              arrival,
+              departureDate,
+              adt
+            }
+        });
+        setPlanes(response.data);
+    } catch (error) {
+        console.error('Error fetching flights:', error);
+    }
+};
+
+  useEffect(() => {
+    fetchFlights(searchParams?.get("departure"), searchParams?.get("arrival"), searchParams?.get("departureDate"), searchParams?.get("adt"));
+    axios.get("http://localhost:5000/api/cities").then((response) => {
+      setCities(response.data);
+    });
+  }, [searchParams]);
+
+    const flightSchema = useMemo(
+      () =>
+        yupResolver(
+          yup.object({
+            origin: yup.string(),
+            destination: yup.string(),
+            departureDate: yup.string(),
+            adtNo: yup.number(),
+          })
+        ),
+      []
+    );
   
-  const [plane, setPlane] = useState<{origin?: string; destination?: string; checkIn?: string; checkOut?: string; passengersNo?: number;}>({
-    origin: city?.substring(0, 3),
-    destination: city?.substring(4),
-    checkIn: searchParams?.get("departing") ?? "",
-    checkOut: searchParams?.get("departing") ?? "",
-    passengersNo: Number(searchParams.get("passNo"))
-  });
-
-    const PlanesDetail: IPlaneDetail[] = [
-        {
-          id: 1,
-          detail: {
-              name: "کیش ایر",
-              class: "اکونومی", 
-              logo: "https://picsum.photos/id/230/200/200", 
-              ticketType: "سیستمی", 
-              type: "Boeing M-85",
-          },
-          from: {
-              city: "مشهد",
-              hour: "12:23"
-          },
-          to: {
-              city: "کیش",
-              hour: "14:23"
-          },
-          totalPrice: 1700000,
+    const formMethods = useForm({
+      mode: "onChange",
+      resolver: flightSchema,
+      defaultValues: {  
+        origin: searchParams?.get("departure") ?? "", 
+        destination: searchParams?.get("arrival") ?? "", 
+        departureDate: searchParams?.get("departureDate") ?? "", 
+        adtNo: +searchParams?.get("adt")! 
       },
-        {
-          id: 2,
-          detail: {
-              name: "هما",
-              class: "اکونومی", 
-              logo: "https://picsum.photos/id/232/200/200", 
-              ticketType: "سیستمی", 
-              type: "Topolof",
-          },
-          from: {
-              city: "مشهد",
-              hour: "08:00"
-          },
-          to: {
-              city: "تهران",
-              hour: "09:30"
-          },
-          totalPrice: 1480000,
-        },
-        {
-          id: 2,
-          detail: {
-              name: "هما",
-              class: "اکونومی", 
-              logo: "https://picsum.photos/id/232/200/200", 
-              ticketType: "سیستمی", 
-              type: "Topolof",
-          },
-          from: {
-              city: "مشهد",
-              hour: "08:00"
-          },
-          to: {
-              city: "تهران",
-              hour: "09:30"
-          },
-          totalPrice: 1480000,
-      },
-      {
-        id: 2,
-        detail: {
-            name: "هما",
-            class: "اکونومی", 
-            logo: "https://picsum.photos/id/232/200/200", 
-            ticketType: "سیستمی", 
-            type: "Topolof",
-        },
-        from: {
-            city: "مشهد",
-            hour: "08:00"
-        },
-        to: {
-            city: "تهران",
-            hour: "09:30"
-        },
-        totalPrice: 1480000,
-      },
-      {
-        id: 2,
-        detail: {
-            name: "هما",
-            class: "اکونومی", 
-            logo: "https://picsum.photos/id/232/200/200", 
-            ticketType: "سیستمی", 
-            type: "Topolof",
-        },
-        from: {
-            city: "مشهد",
-            hour: "08:00"
-        },
-        to: {
-            city: "تهران",
-            hour: "09:30"
-        },
-        totalPrice: 1480000,
-      },
-      {
-        id: 2,
-        detail: {
-            name: "هما",
-            class: "اکونومی", 
-            logo: "https://picsum.photos/id/232/200/200", 
-            ticketType: "سیستمی", 
-            type: "Topolof",
-        },
-        from: {
-            city: "مشهد",
-            hour: "08:00"
-        },
-        to: {
-            city: "تهران",
-            hour: "09:30"
-        },
-        totalPrice: 1480000,
-      },
-      {
-        id: 2,
-        detail: {
-            name: "هما",
-            class: "اکونومی", 
-            logo: "https://picsum.photos/id/232/200/200", 
-            ticketType: "سیستمی", 
-            type: "Topolof",
-        },
-        from: {
-            city: "مشهد",
-            hour: "08:00"
-        },
-        to: {
-            city: "تهران",
-            hour: "09:30"
-        },
-        totalPrice: 1480000,
-      },
-      {
-        id: 2,
-        detail: {
-            name: "هما",
-            class: "اکونومی", 
-            logo: "https://picsum.photos/id/232/200/200", 
-            ticketType: "سیستمی", 
-            type: "Topolof",
-        },
-        from: {
-            city: "مشهد",
-            hour: "08:00"
-        },
-        to: {
-            city: "تهران",
-            hour: "09:30"
-        },
-        totalPrice: 1480000,
-      },
-    ];
-
-    const classes = {
-        box: {
-            display: "flex",
-            padding: "1rem 2rem",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            direction: "rtl", 
-            backgroundColor: "#f7f7f7", 
-            gap: 2,
-        },
-        input: {
-            minWidth: "100%",
-            height: "55px",
-          },
-    };
+    });
+  
+    const { control, formState, handleSubmit, getValues } = formMethods;
 
     return (
         <Box sx={{ display: "flex", direction: "rtl" }}>
-            <Box sx={{ display: "flex", flexDirection: "column", width: "30%", padding: "24px 16px", border: "3px solid #f7f7f7", borderRadius: "8px", gap: 2, height: "fit-content" }}>
-              <Box sx={{ display: "flex", flexDirection: "column" }}>
-                <Typography>
-                  مبدا (شهر)
-                </Typography>
-                <FormControl>
-                  <Select
-                      labelId="origin-city"
-                      id="origin-city-id"
-                      value={plane?.origin}
-                      sx={classes.input}
-                      MenuProps={{
-                      PaperProps: {
-                          sx: {
-                          maxHeight: "300px",
-                          direction: "rtl",
-                          },
-                      },
-                      }}
-                      onChange={e => setPlane(prevState => ({ ...prevState, origin: e.target.value}))}
-                  >
-                      {Cities.map((city) => (
-                      <MenuItem value={city.value}>{city.label}</MenuItem>
-                      ))}
-                  </Select>
-                </FormControl>
-              </Box>
-              <Box sx={{ display: "flex", flexDirection: "column" }}>
-                <Typography>
-                  مقصد (شهر)
-                </Typography>
-                <FormControl>
-                  <Select
-                    labelId="origin-city"
-                    id="origin-city-id"
-                    value={plane?.destination} 
-                    sx={classes.input}
-                    MenuProps={{
-                      PaperProps: {
-                        sx: {
-                          maxHeight: "300px",
-                          direction: "rtl",
-                        },
-                      },
-                    }}
-                    onChange={e => setPlane(prevState => ({ ...prevState, destination: e.target.value}))}
-                  >
-                    {Cities.map((city) => (
-                      <MenuItem value={city.value}>{city.label}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Box>
-              <Divider />
-              <Box sx={{ display: "flex", flexDirection: "column" }}>
-                <Typography>
-                  تاریخ رفت
-                </Typography>
-                <TextField type="date" value={plane?.checkIn} onChange={e => setPlane(prevState => ({ ...prevState, checkIn: e.target.value}))} sx={classes.input} />
-              </Box>
-              <Box sx={{ display: "flex", flexDirection: "column" }}>
-                <Typography>
-                  تاریخ برگشت
-                </Typography>
-                <TextField type="date" value={plane?.checkOut} onChange={e => setPlane(prevState => ({ ...prevState, checkOut: e.target.value}))} sx={classes.input} />
-              </Box>
-              <Divider />
-              <Box sx={{ display: "flex", flexDirection: "column" }}>
-                <Typography>
-                  تعداد مسافران
-                </Typography>
-                <TextField type="number" value={plane?.passengersNo} onChange={e => setPlane(prevState => ({ ...prevState, passengersNo: +e.target.value}))} sx={classes.input} />
-              </Box>
-              <Button variant="contained" color="warning" onClick={() => console.log(plane)}>
-                جستجو
-              </Button>
+            <Box sx={{ display: "flex", flexDirection: "column", width: "25%", padding: "24px 16px", border: "3px solid #f7f7f7", borderRadius: "8px", gap: 2, height: "fit-content" }}>
+              <FormProvider {...formMethods}>
+                <Box sx={{ display: "flex",direction: "rtl", justifyContent: "space-between", flexDirection: "column", gap: 2 }}>
+                  <Box sx={{ display: "flex", flexDirection: "column" }}>
+                    <Typography>
+                      مبدا (شهر)
+                      <span style={{ color: "red" }}>*</span>
+                    </Typography>
+                    <SelectComponent
+                      control={control}
+                      name="origin"
+                      options={cities.map((ct) => ({
+                        label: ct.faDisplayName,
+                        value: ct.id
+                      }))}
+                    />
+                  </Box>
+                  <Box sx={{ display: "flex", flexDirection: "column" }}>
+                    <Typography>
+                      مقصد (شهر)
+                      <span style={{ color: "red" }}>*</span>
+                    </Typography>
+                    <SelectComponent
+                      control={control}
+                      name="destination"
+                      options={cities.map((ct) => ({
+                        label: ct.faDisplayName,
+                        value: ct.id
+                      }))}
+                    />
+                  </Box>
+                  <Box sx={{ display: "flex", flexDirection: "column" }}>
+                    <Typography>
+                      تاریخ رفت
+                      <span style={{ color: "red" }}>*</span>
+                    </Typography>
+                    <InputComponent control={control} name="departureDate" type="date" />
+                  </Box>
+                  <Box sx={{ display: "flex", flexDirection: "column" }}>
+                    <Typography>
+                      تعداد مسافران
+                      <span style={{ color: "red" }}>*</span>
+                    </Typography>
+                    <InputComponent control={control} name="adtNo" type="number" />
+                  </Box>
+                  <Button variant="contained" color="warning" disabled={!formState.isValid} onClick={() => {
+                    navigate({
+                      pathname: `/flights`,
+                      search: createSearchParams({
+                        departure: getValues("origin") ?? "",
+                        arrival: getValues("destination") ?? "",
+                        departureDate: getValues("departureDate") ?? "",
+                        adt: getValues("adtNo")?.toString() ?? "",
+                      }).toString()
+                    });
+                  }}>
+                    جستجو
+                  </Button>
+                </Box>
+              </FormProvider>
             </Box>
-            <Box sx={{ width: "70%", display: "flex", flexDirection: "column", gap: 2, alignItems: "center",  paddingX: "16px" }}>
-              {PlanesDetail.map((pln) => (
-                  <PlaneCard detail={pln.detail} from={pln.from} to={pln.to} 
-                  totalPrice={pln.totalPrice} onClick={() => navigate({ pathname: `/flights/${plane?.origin}-${plane?.destination}/${pln?.id}` })} />
-              ))}
+            <Box sx={{ width: "75%", display: "flex", flexDirection: "column", gap: 2, alignItems: "center",  paddingX: "16px" }}>
+              {planes.length > 0 ?
+              planes.map((pln) => (
+                  <PlaneCard 
+                    flight={pln}
+                    cities={cities}
+                    onClick={() => navigate({ pathname: `/flights/${pln?.id}` })} 
+                  />
+              )) : <>No planes</>}
             </Box>
         </Box>
     );
