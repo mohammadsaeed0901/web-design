@@ -1,13 +1,44 @@
-import { Box, Button, FormControl, MenuItem, Select, TextField, Typography } from "@mui/material";
+import { Box, Button, FormControl, MenuItem, Select, TextField, Typography, useTheme } from "@mui/material";
 import { PlaneIcon, UserGroupIcon } from "Assets/Svg";
-import { useState, type FC } from "react";
+import { AirplaneClassTypeTrans, AirplaneTicketTypeTrans, AirplaneTypeTrans } from "Components/Cards/Plane/PlaneCard.d";
+import { CalculateDepartureAndArrivalTime } from "Helpers/FlightUtils";
+import { priceSeparator, toPersianDigit } from "Helpers/Utils";
+import { type ICity } from "Interfaces/City.interface";
+import { type IFlight } from "Interfaces/Flight.interface";
+import axios from "axios";
+import { useState, type FC, useEffect } from "react";
+import { useParams } from "react-router-dom";
 
-const PlaneReserve: FC = (props) => {
+const PlaneReserve: FC = () => {
+  const { id } = useParams();
+  const theme = useTheme();
+  const [cities, setCities] = useState<ICity[]>([]);
+  const [flight, setFlight] = useState<IFlight>();
   const [name, setName]= useState<string>("");
   const [lastName, setLastName]= useState<string>("");
   const [gender, setGender]= useState<string>("");
   const [nationalCode, setNationalCode]= useState<string>("");
   const [birthDate, setBirthDate]= useState<string>("");
+
+  
+  
+  const fetchFlight = async (flightId: string | undefined) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/flights/${flightId}`);
+      setFlight(response.data);
+    } catch (error) {
+      console.error('Error fetching flight:', error);
+    }
+  };
+  
+  useEffect(() => {
+    fetchFlight(id);
+    axios.get(`http://localhost:5000/api/cities`).then((response) => {
+      setCities(response.data);
+    });
+  }, [id]);
+  
+  const { formattedDepartureTime, formattedArrivalTime } = CalculateDepartureAndArrivalTime(flight?.departureTime as string, flight?.journeyDurationPerMinute as number);
 
     const classes = {
       box: {
@@ -50,7 +81,7 @@ const PlaneReserve: FC = (props) => {
                   مبدا:
                 </Typography>
                 <Typography>
-                  {1+1}
+                  {cities.find((ct) => ct.id === flight?.originCityId)?.faDisplayName}
                 </Typography>
               </Box>
               <Box sx={{ display: "flex", gap: 2 }}>
@@ -58,25 +89,57 @@ const PlaneReserve: FC = (props) => {
                   مقصد:
                 </Typography>
                 <Typography>
-                  {1+1}
+                  {cities.find((ct) => ct.id === flight?.destinationCityId)?.faDisplayName}
+                </Typography>
+              </Box>
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <Typography>
+                  تاریخ رفت:
+                </Typography>
+                <Typography>
+                  {toPersianDigit(formattedDepartureTime)}
+                </Typography>
+              </Box>
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <Typography>
+                  رسیدن به مقصد:
+                </Typography>
+                <Typography>
+                  {toPersianDigit(formattedArrivalTime)}
                 </Typography>
               </Box>
             </Box>
             <Box sx={{ display: "flex", width: "50%", flexDirection: "column" }}>
               <Box sx={{ display: "flex", gap: 2 }}>
                 <Typography>
-                  مبدا:
+                  کلاس پرواز:
                 </Typography>
                 <Typography>
-                  {1+1}
+                  {AirplaneClassTypeTrans[flight?.airplaneClassType!]}
                 </Typography>
               </Box>
               <Box sx={{ display: "flex", gap: 2 }}>
                 <Typography>
-                  مقصد:
+                  نوع بلیط:
                 </Typography>
                 <Typography>
-                  {1+1}
+                  {AirplaneTicketTypeTrans[flight?.airplaneTicketType!]}
+                </Typography>
+              </Box>
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <Typography>
+                  نوع هواپیما:
+                </Typography>
+                <Typography>
+                  {AirplaneTypeTrans[flight?.airplaneType!]}
+                </Typography>
+              </Box>
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <Typography>
+                  قیمت:
+                </Typography>
+                <Typography color={theme.palette.primary.main}>
+                  {toPersianDigit(priceSeparator(+flight?.totalPrice!))} ریال
                 </Typography>
               </Box>
             </Box>
