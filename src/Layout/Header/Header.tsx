@@ -1,20 +1,18 @@
 import { useContext, useState } from "react";
 import { AppBar, Toolbar, Box, Button, Menu, Typography, useTheme, Divider } from "@mui/material";
-import IconButton from "@mui/material/IconButton";
-import MenuIcon from '@mui/icons-material/Menu';
-import TextField from "@mui/material/TextField";
-import { MenuContext } from "Layout/Menu/MenuContext";
 import { getStyles } from "./Header.module";
 import { ChevronDownIcon, ChevronLeftIcon, ChevronUpIcon, LifePreserverIcon, UserIcon } from "Assets/Svg";
+import { TabContext } from "./TabContext.component";
+import Profile from "Pages/Profile/Profile.component";
 
 const Header = () => {
     const theme = useTheme();
     const classes = getStyles(theme);
+    const { setValue } = useContext(TabContext);
     const [profileAncher, setProfileAncher] = useState<Element | null>(null);
     const [ticketAncher, setTicketAncher] = useState<Element | null>(null);
     const [residentialAncher, setResidentialAncher] = useState<Element | null>(null);
-    const [open, setOpen] = useContext(MenuContext);
-    const refreshToken = window.localStorage.getItem("refreshtoken");
+    const [openDialog, setOpenDialog] = useState<string>("");
 
     const closeProfile = () => {
         setProfileAncher(null);
@@ -33,12 +31,9 @@ const Header = () => {
       };
     
   return (
-    <AppBar color="inherit" dir="rtl" position="fixed" elevation={0} sx={{minHeight: "2rem", boxShadow: "0 .125rem .25rem rgba(0,0,0,.075)!important", backgroundColor: "#FFF" }}>
+    <AppBar color="inherit" dir="rtl" position="fixed" elevation={0} sx={{minHeight: "2rem", boxShadow: "0 .125rem .25rem rgba(0,0,0,.075)!important", backgroundColor: "#FDB713" }}>
         <Toolbar sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between" }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 4 }}>
-                <IconButton type="button" disableTouchRipple aria-label="menu" onClick={() => setOpen(!open)}>
-                    <MenuIcon />
-                </IconButton>
                 <Box sx={{ display: "flex", height: "30px", cursor: "pointer" }} onClick={() => window.location.assign("/")}>
                     <Typography>
                         Booking Site
@@ -73,7 +68,7 @@ const Header = () => {
                                 <Button
                                     sx={classes.profileMenuButton}
                                     fullWidth
-                                    onClick={() => window.location.assign("/flights")}
+                                    onClick={() => setValue(0)}
                                 >
                                     هواپیما
                                 </Button>
@@ -81,7 +76,7 @@ const Header = () => {
                                 <Button
                                     sx={classes.profileMenuButton}
                                     fullWidth
-                                    onClick={() => window.location.assign("/trains")}
+                                    onClick={() => setValue(1)}
                                 >
                                     قطار
                                 </Button>
@@ -117,7 +112,7 @@ const Header = () => {
                                 <Button
                                     sx={classes.profileMenuButton}
                                     fullWidth
-                                    onClick={() => console.log("qwe")}
+                                    onClick={() => setValue(2)}
                                 >
                                     هتل
                                 </Button>
@@ -125,7 +120,7 @@ const Header = () => {
                                 <Button
                                     sx={classes.profileMenuButton}
                                     fullWidth
-                                    onClick={() => console.log("qwe")}
+                                    onClick={() => setValue(3)}
                                 >
                                     سوئیت
                                 </Button>
@@ -134,31 +129,6 @@ const Header = () => {
                     </Menu>
                 </Box>
             </Box>      
-
-            {/* <Box sx={{ display: "flex", width: "40%" }}>
-                <TextField
-                id="search-bar"
-                className="text"
-                onInput={(e) => {
-                    console.log(e);
-                }}
-                variant="outlined"
-                placeholder="جستجو کنید ..."
-                size="small"
-                fullWidth
-                />
-                <IconButton type="submit" disableTouchRipple aria-label="search">
-                    <SearchIcon style={{ fill: "blue" }} />
-                </IconButton>
-            </Box> */}
-
-            {/* <Button variant="contained" onClick={() => {
-                window.location.assign("../login");
-                window.localStorage.removeItem("refreshtoken");
-            }}
-                    color={refreshToken ? "error" : "success"} sx={{ borderRadius: "1rem", boxShadow: "0 .125rem .25rem rgba(0,0,0,.075)!important", fontFamily: "inherit" }} disableElevation disableRipple>
-                {refreshToken ? "خروج از حساب کاربری" : "ورود / ثبت نام"}
-            </Button> */}
             <Box sx={classes.iconContainer}>
                 <Box sx={classes.iconContainer}>
                     <Button
@@ -168,7 +138,7 @@ const Header = () => {
                             <LifePreserverIcon />
                         }
                     >
-                        <Typography variant="body1" color={theme.palette.grey[500]}>
+                        <Typography variant="body1" color={theme.palette.primary.dark}>
                             رزرو های من
                         </Typography>
                     </Button>
@@ -187,8 +157,8 @@ const Header = () => {
                             <ChevronUpIcon />
                         )}
                     >
-                        <Typography variant="body1" color={theme.palette.grey[500]}>
-                            saeed
+                        <Typography variant="body1" color={theme.palette.primary.dark}>
+                            username
                         </Typography>
                     </Button>
 
@@ -210,7 +180,7 @@ const Header = () => {
                                 <Button
                                 sx={classes.profileMenuButton}
                                 fullWidth
-                                onClick={() => console.log("qwe")}
+                                onClick={() => setOpenDialog("user-info")}
                                 >
                                     مشخصات کاربری
                                 </Button>
@@ -231,6 +201,9 @@ const Header = () => {
                 </Box>
             </Box>
         </Toolbar>
+        {openDialog === "user-info" && (
+           <Profile handleClose={() => setOpenDialog("")} /> 
+        )}
     </AppBar>
   );
 };
