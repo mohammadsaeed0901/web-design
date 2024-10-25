@@ -1,14 +1,16 @@
 import { Box, Button, Divider, FormControl, MenuItem, Select, TextField, Typography } from "@mui/material";
-import { Cities } from "../Dashboard/Dashboard.module";
-import { useState, type FC } from "react";
+import { useEffect, useState, type FC } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
 import TrainCard from "Components/Cards/Train/TrainCard.component";
 import { ITrainDetail } from "Interfaces/TrainDetail.interface";
+import axios from "axios";
+import { ICity } from "Interfaces/City.interface";
 
 const TrainsList: FC = () => {
   const { city } = useParams();
   const [searchParams] = useSearchParams();
+  const [cities, setCities] = useState<ICity[]>([]);
   const navigate = useNavigate();
   
   const [train, setTrain] = useState<{origin?: string; destination?: string; checkIn?: string; checkOut?: string; passengersNo?: number;}>({
@@ -18,6 +20,13 @@ const TrainsList: FC = () => {
     checkOut: searchParams?.get("departing") ?? "",
     passengersNo: Number(searchParams.get("passNo"))
   });
+
+  useEffect(() => {
+    axios.get(`http://localhost:5000/api/cities`).then((response) => {
+      setCities(response.data.result);
+    });
+  }, []);
+
 
     const TrainsDetail: ITrainDetail[] = [
         {
@@ -206,8 +215,8 @@ const TrainsList: FC = () => {
                       }}
                       onChange={e => setTrain(prevState => ({ ...prevState, origin: e.target.value}))}
                   >
-                      {Cities.map((city) => (
-                      <MenuItem value={city.value}>{city.label}</MenuItem>
+                      {cities.map((city) => (
+                      <MenuItem value={city.name}>{city.faDisplayName}</MenuItem>
                       ))}
                   </Select>
                 </FormControl>
@@ -232,8 +241,8 @@ const TrainsList: FC = () => {
                     }}
                     onChange={e => setTrain(prevState => ({ ...prevState, destination: e.target.value}))}
                   >
-                    {Cities.map((city) => (
-                      <MenuItem value={city.value}>{city.label}</MenuItem>
+                    {cities.map((city) => (
+                      <MenuItem value={city.name}>{city.faDisplayName}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>

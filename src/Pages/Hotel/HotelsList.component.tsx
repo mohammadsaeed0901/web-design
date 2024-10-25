@@ -1,14 +1,16 @@
 import { Box, Button, FormControl, MenuItem, Select, TextField, Typography } from "@mui/material";
-import { Cities } from "../Dashboard/Dashboard.module";
-import { useState, type FC } from "react";
+import { useEffect, useState, type FC } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
 import HotelCard from "Components/Cards/Hotel/HotelCard.component";
 import { IHotelDetail } from "Interfaces/HotelDetail.interface";
+import axios from "axios";
+import { ICity } from "Interfaces/City.interface";
 
 const HotelsList: FC = () => {
   const { city } = useParams();
   const [searchParams] = useSearchParams();
+  const [cities, setCities] = useState<ICity[]>([]);
   const navigate = useNavigate();
   
   const [hotel, setHotel] = useState<{destination?: string; checkIn?: string; checkOut?: string; passengersNo?: number;}>({
@@ -17,6 +19,13 @@ const HotelsList: FC = () => {
     checkOut: searchParams?.get("departing") ?? "",
     passengersNo: Number(searchParams.get("passNo"))
   });
+
+  useEffect(() => {
+    axios.get(`http://localhost:5000/api/cities`).then((response) => {
+      setCities(response.data.result);
+    });
+  }, []);
+
 
     const HotelsDetail: IHotelDetail[] = [
         {
@@ -79,8 +88,8 @@ const HotelsList: FC = () => {
                       },
                     }}
                     onChange={e => setHotel(prevState => ({ ...prevState, destination: e.target.value}))}>
-                    {Cities.map((city) => (
-                      <MenuItem value={city.value}>{city.label}</MenuItem>
+                    {cities.map((city) => (
+                      <MenuItem value={city.name}>{city.faDisplayName}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
