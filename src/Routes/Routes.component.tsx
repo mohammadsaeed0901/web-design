@@ -18,8 +18,8 @@ const Routes: FC = () => {
         <AppRoutes>
           <Route path="/" element={<GuardRoute />}>
             <Route path="/" element={<Dashboard />} />
-            <Route path="/flights/:city" element={<PlanesList />} />
-            <Route path="/flights/:city/:id" element={<PlaneReserve />} />
+            <Route path="/flights" element={<PlanesList />} />
+            <Route path="/flights/:id" element={<PlaneReserve />} />
             <Route path="/trains/:city" element={<TrainsList />} />
             <Route path="/trains/:city/:id" element={<TrainReserve />} />
             <Route path="/hotel/:city" element={<HotelsList />} />
